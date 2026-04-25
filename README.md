@@ -3,7 +3,7 @@
 **Authors:** Christopher Ghanma, Brandon Heiney, Megan Hoxha, Gabriel Brinza, Bishesh Joshi, Sai Gudapati
 
 ## System Description & Architecture
-PatchEMR is an external, automated deployment constraint system designed to safely orchestrate updates for OpenEMR environments. Upgrading healthcare infrastructure introduces significant socio-technical risks, including potential downtime and the introduction of new vulnerabilities. 
+PatchEMR is an external, automated deployment constraint system designed to safely orchestrate updates for OpenEMR environments. Upgrading healthcare infrastructure introduces significant socio-technical risks, including potential downtime and the introduction of new vulnerabilities. The main goal is to make vulnerability management accessible to even less technical clinicians and staff to ensure no matter who is the security team or if there is one, everyone can simply deploy new versions of OpenEMR and learn more about the security implications. 
 
 This system works strictly outside the OpenEMR boundary. It integrates an AI Threat Broker and a Kubernetes Deployment Enforcer. 
 * **Pre-Flight Analysis:** The system uses an ephemeral Kubernetes pod to execute a Trivy container scan, and compares the live production OpenEMR image against the proposed version. 
