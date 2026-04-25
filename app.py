@@ -64,7 +64,7 @@ def run_trivy_scan(image_tag):
         cmd = [
             "kubectl", "run", pod_name,
             "--rm", "-i", "--restart=Never",
-            "--image-pull-policy=IfNotPresent", # <--- SPEED BOOST: Skips the internet check
+            "--image-pull-policy=IfNotPresent",
             "--image=aquasec/trivy:latest",
             "--", "image", "-f", "json", "--severity", "HIGH,CRITICAL", "-q", image_tag
         ]
