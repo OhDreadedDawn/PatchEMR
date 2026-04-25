@@ -56,11 +56,31 @@ def get_github_versions():
     return default_tags
 
 def run_trivy_scan(image_tag):
-    """Executes Trivy via subprocess, parses the JSON, and returns the count and detailed CVEs."""
+    """Executes Trivy via an ephemeral Kubernetes Pod."""
     try:
-        cmd = ["trivy", "image", "-f", "json", "--severity", "HIGH,CRITICAL", "-q", image_tag]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        data = json.loads(result.stdout)
+
+        
+        pod_name = f"trivy-scan-{int(time.time())}"
+        cmd = [
+            "kubectl", "run", pod_name,
+            "--rm", "-i", "--restart=Never",
+            "--image-pull-policy=IfNotPresent", # <--- SPEED BOOST: Skips the internet check
+            "--image=aquasec/trivy:latest",
+            "--", "image", "-f", "json", "--severity", "HIGH,CRITICAL", "-q", image_tag
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+
+        output = result.stdout
+        
+        json_start = output.find('{')
+        json_end = output.rfind('}') + 1
+        
+        if json_start == -1 or json_end == 0:
+            return None, f"Scanner failed or returned no JSON. Error: {result.stderr.strip()}"
+            
+        data = json.loads(output[json_start:json_end])
         
         vulns = []
         if "Results" in data:
@@ -128,7 +148,6 @@ if st.button("Run Pre-Flight Analysis", type="primary"):
     if api_key:
         with st.spinner("AI Threat Broker generating executive summary..."):
             
-            # Extract top 3 CVEs to feed the LLM for highly specific context
             prod_cve_sample = ", ".join([v['id'] for v in prod_vulns[:3]]) if prod_vulns else "None"
             staging_cve_sample = ", ".join([v['id'] for v in staging_vulns[:3]]) if staging_vulns else "None"
             
@@ -185,7 +204,7 @@ if st.session_state.get('analysis_run'):
         st.error(st.session_state['llm_summary'])
         st.error("System Constraint Enforced: Deployment blocked due to increased or stagnant risk profile.")
 
-# CHAT WITH LLM
+# Chat with LLM
 st.divider()
 st.subheader("Chat with AI Threat Broker")
 st.markdown("Query the AI regarding vulnerability details, HIPAA compliance implications, or architectural constraints.")
