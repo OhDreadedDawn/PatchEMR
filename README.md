@@ -27,7 +27,7 @@ This Proof of Concept (PoC) is designed to run in a Linux environment with a loc
 3. Start your local Kubernetes cluster:
    `minikube start`
 4. Deploy the Baseline OpenEMR Environment:
-   `minikube kubectl create deployment openemr-staging --image=openemr/openemr:7.0.2`
+   `kubectl create deployment openemr-staging --image=openemr/openemr:7.0.2`
 
 ## Execution & Demo Instructions
 1. Get a Gemini API Key from Google AI Studio.
